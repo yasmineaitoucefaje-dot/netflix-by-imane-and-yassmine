@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Clone</title>
+    <style>
+        /* Variables CSS */
+        :root {
+            --netflix-red: #e50914;
+            --netflix-black: #141414;
+            --netflix-dark-gray: #2f2f2f;
+            --netflix-light-gray: #b3b3b3;
+            --netflix-white: #ffffff;
+        }
+
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--netflix-black);
+            color: var(--netflix-white);
+            line-height: 1.4;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: var(--netflix-black);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: background-color 0.3s;
+        }
+
+        .scrolled {
+            background-color: rgba(20, 20, 20, 0.95);
+        }
+
+        .logo {
+            color: var(--netflix-red);
+            font-size: 2rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: var(--netflix-white);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--netflix-light-gray);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .search-box input {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--netflix-white);
+            color: var(--netflix-white);
+            padding: 5px 10px;
+            border-radius: 4px;
+            width: 200px;
+            transition: width 0.3s;
+        }
+
+        .search-box input:focus {
+            width: 250px;
+            outline: none;
+        }
+
+        .profile {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background-color: var(--netflix-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Bannière principale */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.8) 100%), url('https://via.placeholder.com/1920x1080') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+            margin-top: 80px;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--netflix-light-gray);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-play {
+            background-color: var(--netflix-white);
+            color: var(--netflix-black);
+        }
+
+        .btn-info {
+            background-color: rgba(109, 109, 110, 0.7);
+            color: var(--netflix-white);
+        }
+
+        /* Filtres */
+        .filters {
+            padding: 20px 50px;
+            background-color: var(--netflix-dark-gray);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background-color: transparent;
+            border: 1px solid var(--netflix-light-gray);
+            color: var(--netflix-light-gray);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--netflix-white);
+            color: var(--netflix-black);
+            border-color: var(--netflix-white);
+        }
+
+        .filter-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Contenu principal */
+        .content {
+            padding: 20px 50px;
+        }
+
+        .row {
+            margin-bottom: 40px;
+        }
+
+        .row-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .item {
+            min-width: 220px;
+            height: 330px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .item:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            padding: 20px 10px 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .item:hover .item-info {
+            opacity: 1;
+        }
+
+        .item-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .item-meta {
+            font-size: 0.8rem;
+            color: var(--netflix-light-gray);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--netflix-black);
+            margin: 50px auto;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--netflix-black);
+            border: none;
+            color: var(--netflix-white);
+            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-header {
+            height: 400px;
+            position: relative;
+        }
+
+        .modal-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: var(--netflix-light-gray);
+        }
+
+        .modal-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-cast, .modal-genres {
+            margin-bottom: 15px;
+        }
+
+        .modal-cast span, .modal-genres span {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 30px 50px;
+            background-color: var(--netflix-black);
+            border-top: 1px solid var(--netflix-dark-gray);
+            text-align: center;
+            color: var(--netflix-light-gray);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            color: var(--netflix-light-gray);
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: var(--netflix-white);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: var(--netflix-light-gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+           header {padding: 15px 20px;}
+            
+            .hero {
+                padding: 0 20px;
+                height: 60vh;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .filters, .content {
+                padding: 15px 20px;
+            }
+            
+            .item {
+                min-width: 150px;
+                height: 225px;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <a href="#" class="logo">NETFLIX</a>
+        <nav>
+            <ul>
+                <li><a href="#" class="active">Accueil</a></li>
+                <li><a href="#">Séries</a></li>
+                <li><a href="#">Films</a></li>
+                <li><a href="#">Nouveautés</a></li>
+                <li><a href="#">Ma liste</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <div class="search-box">
+                <input type="text" placeholder="Rechercher...">
+            </div>
+            <div class="profile">U</div>
+        </div>
+    </header>
+
+    <!-- Bannière principale -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Stranger Things</h1>
+            <p class="hero-description">À Hawkins, en 1983, des événements étranges se produisent après la disparition d'un jeune garçon. Ses amis, sa famille et le shérif local vont tout mettre en œuvre pour le retrouver.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-play"><i class="fas fa-play"></i> Lecture</button>
+                <button class="btn btn-info"><i class="fas fa-info-circle"></i> Plus d'infos</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtres -->
+    <section class="filters">
+        <h3>Filtrer par :</h3>
+        <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">Tout</button>
+            <button class="filter-btn" data-filter="series">Séries</button>
+            <button class="filter-btn" data-filter="films">Films</button>
+            <button class="filter-btn" data-filter="action">Action</button>
+            <button class="filter-btn" data-filter="drame">Drame</button>
+            <button class="filter-btn" data-filter="comedie">Comédie</button>
+            <button class="filter-btn" data-filter="science-fiction">Science-Fiction</button>
+        </div>
+    </section>
+
+    <!-- Contenu principal -->
+    <main class="content">
+        <!-- Populaire sur Netflix -->
+        <div class="row">
+            <h2 class="row-title">Populaire sur Netflix</h2>
+            <div class="carousel" id="popular">
+                <!-- Les éléments seront ajoutés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Tendances actuelles -->
+        <div class="row">
+            <h2 class="row-title">Tendances actuelles</h2>
+            <div class="carousel" id="trending">
+                <!-- Les éléments seront ajoutés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Nouveautés -->
+        <div class="row">
+            <h2 class="row-title">Nouveautés</h2>
+            <div class="carousel" id="new">
+                <!-- Les éléments seront ajoutés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Séries à succès -->
+        <div class="row">
+            <h2 class="row-title">Séries à succès</h2>
+            <div class="carousel" id="series-hit">
+                <!-- Les éléments seront ajoutés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Films primés -->
+        <div class="row">
+            <h2 class="row-title">Films primés</h2>
+            <div class="carousel" id="award-winning">
+                <!-- Les éléments seront ajoutés dynamiquement -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal pour afficher les détails -->
+    <div class="modal" id="item-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <div class="modal-header">
+                <img id="modal-image" src="" alt="">
+            </div>
+            <div class="modal-body">
+                <h2 id="modal-title"></h2>
+                <div class="modal-meta">
+                    <span id="modal-year"></span>
+                    <span id="modal-duration"></span>
+                    <span id="modal-rating"></span>
+                </div>
+                <p id="modal-description" class="modal-description"></p>
+                <div class="modal-cast">
+                    <span>Avec :</span>
+                    <span id="modal-cast"></span>
+                </div>
+                <div class="modal-genres">
+                    <span>Genres :</span>
+                    <span id="modal-genres"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+        <div class="footer-links">
+            <a href="#">Audiodescription</a>
+            <a href="#">Relations investisseurs</a>
+            <a href="#">Mentions légales</a>
+            <a href="#">Centre d'aide</a>
+            <a href="#">Recrutement</a>
+            <a href="#">Cartes cadeaux</a>
+            <a href="#">Conditions d'utilisation</a>
+            <a href="#">Confidentialité</a>
+            <a href="#">Informations légales</a>
+            <a href="#">Préférences de cookies</a>
+            <a href="#">Nous contacter</a>
+        </div>
+        <p class="copyright">© 2023 Netflix Clone. Tous droits réservés.</p>
+    </footer>
+
+    <script>
+        // Données des films et séries
+        const contentData = [
+            // Séries
+            {
+                id: 1,
+                title: "Stranger Things",
+                type: "series",
+                year: "2016",
+                duration: "4 saisons",
+                rating: "TV-14",
+                genres: ["Science-Fiction", "Drame", "Horreur"],
+                description: "À Hawkins, en 1983, des événements étranges se produisent après la disparition d'un jeune garçon. Ses amis, sa famille et le shérif local vont tout mettre en œuvre pour le retrouver.",
+                cast: "Millie Bobby Brown, Finn Wolfhard, David Harbour",
+                image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQM597avdIaTzr14c-g1rqObg6H12rmlczEEw&s",
+                category: "popular"
+            },
+            {
+                id: 2,
+                title: "The Crown",
+                type: "series",
+                year: "2016",
+                duration: "5 saisons",
+                rating: "TV-MA",
+                genres: ["Drame", "Histoire"],
+                description: "Cette série dramatique suit le règne de la reine Elizabeth II ainsi que les événements politiques et personnels qui ont façonné son héritage.",
+                cast: "Olivia Colman, Tobias Menzies, Helena Bonham Carter",
+                image: "https://m.media-amazon.com/images/M/MV5BNGEwOGI0NWEtNTljNi00OWEyLThjMWMtOTJkOTk5YTM4MDNhXkEyXkFqcGc@._V1_.jpg",
+                category: "trending"
+            },
+            {
+                id: 3,
+                title: "La Casa de Papel",
+                type: "series",
+                year: "2017",
+                duration: "5 parties",
+                rating: "TV-MA",
+                genres: ["Action", "Drame", "Crime"],
+                description: "Huit volets prennent en otage des personnes à l'Intérieur de la Fabrique nationale de la monnaie et des timbres d'Espagne, tandis qu'un génie du crime manipule la police pour mettre son plan à exécution.",
+                cast: "Úrsula Corberó, Álvaro Morte, Itziar Ituño",
+                image: "https://fr.web.img3.acsta.net/pictures/20/03/12/17/42/5808877.jpg",
+                category: "popular"
+            },
+            {
+                id: 4,
+                title: "The Witcher",
+                type: "series",
+                year: "2019",
+                duration: "3 saisons",
+                rating: "TV-MA",
+                genres: ["Action", "Aventure", "Fantasy"],
+                description: "Geralt de Riv, un chasseur de monstres mutant, se bat pour trouver sa place dans un monde où les humains se révèlent souvent plus vicieux que les bêtes.",
+                cast: "Henry Cavill, Anya Chalotra, Freya Allan",
+                image: "https://m.media-amazon.com/images/M/MV5BOTQzMzNmMzUtODgwNS00YTdhLTg5N2MtOWU1YTc4YWY3NjRlXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+                category: "trending"
+            },
+            {
+                id: 5,
+                title: "Breaking Bad",
+                type: "series",
+                year: "2008",
+                duration: "5 saisons",
+                rating: "TV-MA",
+                genres: ["Drame", "Crime", "Thriller"],
+                description: "Un professeur de chimie atteint d'un cancer incurable s'associe à un ancien élève pour fabriquer et vendre de la méthamphétamine afin d'assurer l'avenir financier de sa famille.",
+                cast: "Bryan Cranston, Aaron Paul, Anna Gunn",
+                image: "https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_QL75_UX190_CR0,2,190,281_.jpg",
+                category: "series-hit"
+            },
+            {
+                id: 6,
+                title: "The Queen's Gambit",
+                type: "series",
+                year: "2020",
+                duration: "1 saison",
+                rating: "TV-MA",
+                genres: ["Drame"],
+                description: "Dans les années 1950, une orpheline prodige des échecs lutte contre une dépendance tout en affrontant les meilleurs joueurs du monde.",
+                cast: "Anya Taylor-Joy, Bill Camp, Moses Ingram",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS67NQktym1vS1_6LLiubdHo4YVZQrOoWHpYg&s",
+                category: "award-winning"
+            },
+            {
+                id: 7,
+                title: "Dark",
+                type: "series",
+                year: "2017",
+                duration: "3 saisons",
+                rating: "TV-MA",
+                genres: ["Science-Fiction", "Drame", "Mystère"],
+                description: "La disparition de deux enfants plonge quatre familles dans une quête éperdue pour trouver des réponses. Le mystère qui les unit révèle des histoires de quatre générations.",
+                cast: "Louis Hofmann, Karoline Eichhorn, Lisa Vicari",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1PPbGfMSOkqFJiWUvHvCIlOeUqle2dcN8SA&s",
+                category: "series-hit"
+            },
+            {
+                id: 8,
+                title: "Narcos",
+                type: "series",
+                year: "2015",
+                duration: "3 saisons",
+                rating: "TV-MA",
+                genres: ["Drame", "Crime", "Biographie"],
+                description: "L'histoire vraie de la montée en puissance du cartel de la drogue de Medellín dans la Colombie des années 80 et des efforts des États-Unis pour l'arrêter.",
+                cast: "Wagner Moura, Boyd Holbrook, Pedro Pascal",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrFsnLWfWs-7OjcHCkvX5OB7Qtmoo75IRQZQefDKRHlLuhXhT9uMT49c3tj1Ook_HIfKveFPiJrBEglWIqcEcqxZd6rMPlCjCsVVMtFw&s=10",
+                category: "trending"
+            },
+            {
+                id: 9,
+                title: "Black Mirror",
+                type: "series",
+                year: "2011",
+                duration: "5 saisons",
+                rating: "TV-MA",
+                genres: ["Science-Fiction", "Drame", "Thriller"],
+                description: "Une anthologie de science-fiction qui explore un futur dystopique où les nouvelles technologies ont des conséquences inattendues sur la société.",
+                cast: "Différents acteurs par épisode",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpDfZFf3W3kiOKqjmg5bMDJjOVPvwTDtNrUw&s",
+                category: "series-hit"
+            },
+            {
+                id: 10,
+                title: "Ozark",
+                type: "series",
+                year: "2017",
+                duration: "4 saisons",
+                rating: "TV-MA",
+                genres: ["Drame", "Crime", "Thriller"],
+                description: "Un conseiller financier déménage sa famille dans les Ozarks pour blanchir 500 millions de dollars en cinq ans afin d'apaiser un baron de la drogue.",
+                cast: "Jason Bateman, Laura Linney, Julia Garner",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTl3bUJqt5mhxpsgnogixoGH1lTc3hnZC9kzBX3tmt_0PL08tF_0ecoPUZAdG1mn-UKdFPQceLwhnuKbvfWmrytSOvRQj3C86LknIJJzxM&s",
+                category: "popular"
+            },
+            // Films
+            {
+                id: 11,
+                title: "The Irishman",
+                type: "film",
+                year: "2019",
+                duration: "3h 29m",
+                rating: "R",
+                genres: ["Drame", "Crime", "Biographie"],
+                description: "Frank Sheeran, un vétéran de la Seconde Guerre mondiale devenu tueur à gages, se souvient de son implication dans l'assassinat de son ami Jimmy Hoffa.",
+                cast: "Robert De Niro, Al Pacino, Joe Pesci",
+                image: "https://upload.wikimedia.org/wikipedia/en/8/80/The_Irishman_poster.jpg",
+                category: "award-winning"
+            },
+            {
+                id: 12,
+                title: "Extraction",
+                type: "film",
+                year: "2020",
+                duration: "1h 56m",
+                rating: "R",
+                genres: ["Action", "Thriller"],
+                description: "Un mercenaire est chargé de sauver le fils d'un baron de la drogue qui a été kidnappé. Mais dans le monde impitoyable des trafiquants, une mission apparemment simple devient une lutte pour la survie.",
+                cast: "Chris Hemsworth, Rudhraksh Jaiswal, Randeep Hooda",
+                image: "https://i.ytimg.com/vi/L6P3nI6VnlY/maxresdefault.jpg",
+                category: "trending"
+            },
+            {
+                id: 13,
+                title: "Bird Box",
+                type: "film",
+                year: "2018",
+                duration: "2h 4m",
+                rating: "R",
+                genres: ["Drame", "Science-Fiction", "Thriller"],
+                description: "Cinq ans après qu'une force mystérieuse anéantit la population, une mère et ses deux enfants entreprennent un périlleux voyage à travers la rivière et les forêts pour trouver un refuge.",
+                cast: "Sandra Bullock, Trevante Rhodes, John Malkovich",
+                image: "https://m.media-amazon.com/images/M/MV5BMjAzMTI1MjMyN15BMl5BanBnXkFtZTgwNzU5MTE2NjM@._V1_FMjpg_UX1000_.jpg",
+                category: "popular"
+            },
+            {
+                id: 14,
+                title: "The Gray Man",
+                type: "film",
+                year: "2022",
+                duration: "2h 9m",
+                rating: "PG-13",
+                genres: ["Action", "Thriller"],
+                description: "Quand l'agent de la CIA Court Gentry découvre les sombres secrets de l'agence, un psychopathe ancien collègue met à prix sa tête, déclenchant une chasse à l'homme internationale.",
+                cast: "Ryan Gosling, Chris Evans, Ana de Armas",
+                image: "https://i.ytimg.com/vi/BmllggGO4pM/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCn223a-BFewngA0TXmV9vMQPeIqg",
+                category: "new"
+            },
+            {
+                id: 15,
+                title: "Don't Look Up",
+                type: "film",
+                year: "2021",
+                duration: "2h 18m",
+                rating: "R",
+                genres: ["Comédie", "Drame", "Science-Fiction"],
+                description: "Deux astronomes de bas niveau doivent entreprendre une tournée médiatique massive pour avertir l'humanité qu'un astéroïde va détruire la Terre.",
+                cast: "Leonardo DiCaprio, Jennifer Lawrence, Meryl Streep",
+                image: "https://upload.wikimedia.org/wikipedia/en/5/5c/Don%27t_Look_Up_2021_film.jpg",
+                category: "award-winning"
+            },
+            {
+                id: 16,
+                title: "Red Notice",
+                type: "film",
+                year: "2021",
+                duration: "1h 58m",
+                rating: "PG-13",
+                genres: ["Action", "Comédie", "Thriller"],
+                description: "Un agent du FBI traque le voleur d'art le plus recherché au monde avec l'aide d'un rival rusé.",
+                cast: "Dwayne Johnson, Ryan Reynolds, Gal Gadot",
+                image: "https://via.placeholder.com/300x450/333333/FFFFFF?text=Red+Notice",
+                category: "popular"
+            },
+            {
+                id: 17,
+                title: "The Power of the Dog",
+                type: "film",
+                year: "2021",
+                duration: "2h 6m",
+                rating: "R",
+                genres: ["Drame", "Western"],
+                description: "Un éleveur de bétail charismatique et impitoyable qui inspire crainte et admiration chez ceux qui l'entourent, voit sa vie bouleversée lorsque son frère ramène à la maison une nouvelle épouse et son fils.",
+                cast: "Benedict Cumberbatch, Kirsten Dunst, Jesse Plemons",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREnoVlhcQfApi-7PQ8iAO-I-Jlv-IOsEVxaw&s",
+                category: "award-winning"
+            },
+            {
+                id: 18,
+                title: "Enola Holmes",
+                type: "film",
+                year: "2020",
+                duration: "2h 3m",
+                rating: "PG-13",
+                genres: ["Aventure", "Drame", "Mystère"],
+                description: "Quand la mère d'Enola Holmes disparaît, la jeune surdouée part à sa recherche et se retrouve mêlée à une conspiration impliquant une jeune lord en fuite.",
+                cast: "Millie Bobby Brown, Henry Cavill, Sam Claflin",
+                image: "https://occ-0-8407-2219.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABc_PxIv2xJLugC6rvJCT6kZWNtM30MOl7EuzF_qDXDG0wm5ie1JcA06FfpcbRCohYpuH4jlSBVN8j8QFQ49xcKi0VKdy5E9387Fz.jpg?r=037",
+                category: "new"
+            },
+            {
+                id: 19,
+                title: "The Adam Project",
+                type: "film",
+                year: "2022",
+                duration: "1h 46m",
+                rating: "PG-13",
+                genres: ["Action", "Aventure", "Comédie"],
+                description: "Après s'être accidentellement écrasé en 2022, un pilote de chasse voyage dans le temps et fait équipe avec son moi plus jeune et son père décédé pour réparer le futur.",
+                cast: "Ryan Reynolds, Walker Scobell, Mark Ruffalo",
+                image: "https://via.placeholder.com/300x450/333333/FFFFFF?text=Adam+Project",
+                category: "trending"
+            },
+            {
+                id: 20,
+                title: "Glass Onion",
+                type: "film",
+                year: "2022",
+                duration: "2h 19m",
+                rating: "PG-13",
+                genres: ["Comédie", "Drame", "Mystère"],
+                description: "Le détective Benoit Blanc se rend en Grèce pour percer à jour les secrets d'un groupe d'amis éclectiques et troublants.",
+                cast: "Daniel Craig, Edward Norton, Janelle Monáe",
+                image: "https://s3.amazonaws.com/nightjarprod/content/uploads/sites/192/2022/10/25111047/gOrfE0tX7aLjRR12vveQvBHHGa.jpg",
+                category: "new"
+            },
+            {
+                id: 21,
+                title: "All Quiet on the Western Front",
+                type: "film",
+                year: "2022",
+                duration: "2h 28m",
+                rating: "R",
+                genres: ["Drame", "Guerre"],
+                description: "Paul Baumer et ses amis Albert et Müller, excités par les discours patriotiques de leur professeur, s'engagent dans l'armée allemande. Mais une fois sur le front, ils découvrent l'horreur de la guerre.",
+                cast: "Felix Kammerer, Albrecht Schuch, Aaron Hilmer",
+                image: "https://via.placeholder.com/300x450/333333/FFFFFF?text=All+Quiet",
+                category: "award-winning"
+            },
+            {
+                id: 22,
+                title: "The Midnight Sky",
+                type: "film",
+                year: "2020",
+                duration: "1h 58m",
+                rating: "PG-13",
+                genres: ["Drame", "Science-Fiction"],
+                description: "Dans un monde post-apocalyptique, un scientifique solitaire dans l'Arctique tente d'empêcher un équipage d'astronautes de revenir sur Terre, où une catastrophe mondiale inconnue s'est produite.",
+                cast: "George Clooney, Felicity Jones, David Oyelowo",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOE9ifjvkAIo542Am_AN0oXrPDQBMy6qjcPw&s",
+                category: "new"
+            }
+        ];
+
+        // Initialisation de l'application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remplir les carrousels avec les données
+            populateCarousels();
+            
+            // Configurer les filtres
+            setupFilters();
+            
+            // Configurer le défilement du header
+            setupHeaderScroll();
+            
+            // Configurer la modal
+            setupModal();
+            
+            // Configurer la recherche
+            setupSearch();
+        });
+
+        // Remplir les carrousels avec les données
+        function populateCarousels() {
+            const categories = {
+                'popular': contentData.filter(item => item.category === 'popular'),
+                'trending': contentData.filter(item => item.category === 'trending'),
+                'new': contentData.filter(item => item.category === 'new'),
+                'series-hit': contentData.filter(item => item.category === 'series-hit'),
+                'award-winning': contentData.filter(item => item.category === 'award-winning')
+            };
+            
+            for (const [categoryId, items] of Object.entries(categories)) {
+                const carousel = document.getElementById(categoryId);
+                if (carousel) {
+                    carousel.innerHTML = '';
+                    items.forEach(item => {
+                        const itemElement = createItemElement(item);
+                        carousel.appendChild(itemElement);
+                    });
+                }
+            }
+        }
+
+        // Créer un élément de contenu
+        function createItemElement(item) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.dataset.id = item.id;
+            itemDiv.dataset.type = item.type;
+            itemDiv.dataset.genres = item.genres.join(',');
+            
+            itemDiv.innerHTML = `
+                <img src="${item.image}" alt="${item.title}">
+                <div class="item-info">
+                    <h3 class="item-title">${item.title}</h3>
+                    <div class="item-meta">
+                        <span>${item.year}</span>
+                        <span>${item.rating}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Ajouter l'événement de clic pour ouvrir la modal
+            itemDiv.addEventListener('click', () => openModal(item));
+            
+            return itemDiv;
+        }
+
+        // Configurer les filtres
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Retirer la classe active de tous les boutons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Ajouter la classe active au bouton cliqué
+                    this.classList.add('active');
+                    
+                    // Appliquer le filtre
+                    const filter = this.dataset.filter;
+                    applyFilter(filter);
+                });
+            });
+        }
+
+        // Appliquer le filtre
+        function applyFilter(filter) {
+            const allItems = document.querySelectorAll('.item');
+            
+            allItems.forEach(item => {
+                if (filter === 'all') {
+                    item.style.display = 'block';
+                } else if (filter === 'series' || filter === 'films') {
+                    if (item.dataset.type === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                } else {
+                    // Filtre par genre
+                    const genres = item.dataset.genres.split(',');
+                    if (genres.includes(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Configurer le défilement du header
+        function setupHeaderScroll() {
+            const header = document.getElementById('header');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // Configurer la modal
+        function setupModal() {
+            const modal = document.getElementById('item-modal');
+            const closeButton = document.getElementById('modal-close');
+            
+            // Fermer la modal en cliquant sur le bouton de fermeture
+            closeButton.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            
+            // Fermer la modal en cliquant en dehors du contenu
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Fermer la modal avec la touche Échap
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Ouvrir la modal avec les détails de l'élément
+        function openModal(item) {
+            const modal = document.getElementById('item-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalTitle = document.getElementById('modal-title');
+            const modalYear = document.getElementById('modal-year');
+            const modalDuration = document.getElementById('modal-duration');
+            const modalRating = document.getElementById('modal-rating');
+            const modalDescription = document.getElementById('modal-description');
+            const modalCast = document.getElementById('modal-cast');
+            const modalGenres = document.getElementById('modal-genres');
+            
+            // Remplir la modal avec les données de l'élément
+            modalImage.src = item.image;
+            modalImage.alt = item.title;
+            modalTitle.textContent = item.title;
+            modalYear.textContent = item.year;
+            modalDuration.textContent = item.duration;
+            modalRating.textContent = item.rating;
+            modalDescription.textContent = item.description;
+            modalCast.textContent = item.cast;
+            modalGenres.textContent = item.genres.join(', ');
+            
+            // Afficher la modal
+            modal.style.display = 'block';
+        }
+
+        // Configurer la recherche
+        function setupSearch() {
+            const searchInput = document.querySelector('.search-box input');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                if (searchTerm.length > 2) {
+                    // Filtrer les éléments en fonction du terme de recherche
+                    const filteredItems = contentData.filter(item => 
+                        item.title.toLowerCase().includes(searchTerm) ||
+                        item.description.toLowerCase().includes(searchTerm) ||
+                        item.cast.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    // Afficher les résultats de recherche
+                    displaySearchResults(filteredItems);
+                } else {
+                    // Réinitialiser l'affichage normal
+                    resetSearchResults();
+                }
+            });
+        }
+
+        // Afficher les résultats de recherche
+        function displaySearchResults(results) {
+            // Masquer tous les carrousels
+            document.querySelectorAll('.row').forEach(row => {
+                row.style.display = 'none';
+            });
+            
+            // Créer un nouveau carrousel pour les résultats
+            let searchRow = document.getElementById('search-results');
+            
+            if (!searchRow) {
+                searchRow = document.createElement('div');
+                searchRow.id = 'search-results';
+                searchRow.className = 'row';
+                searchRow.innerHTML = '<h2 class="row-title">Résultats de recherche</h2><div class="carousel" id="search-carousel"></div>';
+                document.querySelector('.content').prepend(searchRow);
+            }
+            
+            const searchCarousel = document.getElementById('search-carousel');
+            searchCarousel.innerHTML = '';
+            
+            // Ajouter les résultats au carrousel
+            results.forEach(item => {
+                const itemElement = createItemElement(item);
+                searchCarousel.appendChild(itemElement);
+            });
+            
+            // Afficher la ligne de résultats
+            searchRow.style.display = 'block';
+        }
+
+        // Réinitialiser les résultats de recherche
+        function resetSearchResults() {
+            // Masquer la ligne de résultats de recherche
+            const searchRow = document.getElementById('search-results');
+            if (searchRow) {
+                searchRow.style.display = 'none';
+            }
+            
+            // Afficher tous les carrousels normaux
+            document.querySelectorAll('.row').forEach(row => {
+                if (row.id !== 'search-results') {
+                    row.style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
